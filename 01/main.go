@@ -38,9 +38,22 @@ func main() {
 
 		p := i - 1
 
-		if p > -1 {
+		// Set up indexes.
+		iOne := i
+		iTwo := i + 1
+		iThree := i + 2
 
-			if depths[i] > depths[p] {
+		pOne := p
+		pTwo := p + 1
+		pThree := p + 2
+
+		if pOne > -1 && iThree < len(depths) {
+
+			// Sum windows.
+			iVal := depths[iOne] + depths[iTwo] + depths[iThree]
+			pVal := depths[pOne] + depths[pTwo] + depths[pThree]
+
+			if iVal > pVal {
 				increaseCount++
 			}
 		}
