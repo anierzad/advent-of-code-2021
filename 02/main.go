@@ -49,15 +49,17 @@ func main() {
 	// Work out final position.
 	horizontal := 0
 	depth := 0
+	aim := 0
 
 	for _, c := range commands {
 		switch c.Direction {
 		case "forward":
 			horizontal = horizontal + c.Units
+			depth = depth + (c.Units * aim)
 		case "down":
-			depth = depth + c.Units
+			aim = aim + c.Units
 		case "up":
-			depth = depth - c.Units
+			aim = aim - c.Units
 		}
 	}
 
