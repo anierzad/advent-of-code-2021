@@ -12,6 +12,7 @@ import (
 type BingoBoard struct {
 	lines [5][5]int
 	marks [5][5]bool
+	Score int
 }
 
 func (b *BingoBoard) MarkNumber(num int) {
@@ -64,7 +65,7 @@ func (b BingoBoard) Winner() bool {
 	return false
 }
 
-func (b BingoBoard) Score(num int) int {
+func (b *BingoBoard) CalculateScore(num int) int {
 
 	total := 0
 
@@ -82,7 +83,9 @@ func (b BingoBoard) Score(num int) int {
 		}
 	}
 
-	return total * num
+	b.Score = total * num
+
+	return b.Score
 }
 
 func main() {
@@ -135,31 +138,31 @@ func main() {
 
 	// Play the game.
 	winners := make([]*BingoBoard, 0)
-	playedNumbers := make([]int, 0)
 
 	for _, number := range numbers {
-
 		for _, board := range boards {
 
+			// Skip already finished boards.
+			if board.Score > 0 {
+				continue
+			}
+
+			// Mark number on board.
 			board.MarkNumber(number)
 
+			// Has it won?
 			if board.Winner() {
+
+				// Calculate score.
+				board.CalculateScore(number)
+
 				winners = append(winners, board)
 			}
 		}
-
-		playedNumbers = append(playedNumbers, number)
-
-		if len(winners) > 0 {
-			break
-		}
 	}
 
-	lastNum := playedNumbers[len(playedNumbers) - 1]
-
 	for i, winner := range winners {
-
-		fmt.Printf("Winner #%d score: %d\n", i, winner.Score(lastNum))
+		fmt.Printf("Winner #%d score: %d\n", i, winner.Score)
 	}
 }
 
