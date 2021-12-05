@@ -25,43 +25,27 @@ type Line struct {
 
 func (l Line) AllPoints() []Point {
 
-	// We need to ignore diagonal lines.
-	if l.start.x != l.end.x &&
-		l.start.y != l.end.y {
-		return make([]Point, 0)
-	}
-
 	points := make([]Point, 0)
 
-	// Decide direction.
-	horizontal := true
+	// Get numbers we're going to traverse for each axis.
+	xRange := NumbersBetween(l.start.x, l.end.x)
+	yRange := NumbersBetween(l.start.y, l.end.y)
 
-	if l.start.y != l.end.y {
-		horizontal = false
+	// Expand smaller slice for straight lines.
+	if len(xRange) > len(yRange) {
+		yRange = ArrayToLength(yRange[0], len(xRange))
+	}
+	if len(yRange) > len(xRange) {
+		xRange = ArrayToLength(xRange[0], len(yRange))
 	}
 
-	if horizontal {
-
-		// X logic, Y remains constant.
-		for _, num := range NumbersBetween(l.start.x, l.end.x) {
-			p := Point{
-				x: num,
-				y: l.start.y,
-			}
-			points = append(points, p)
+	// Build points.
+	for i := range xRange {
+		p := Point{
+			x: xRange[i],
+			y: yRange[i],
 		}
-
-	} else {
-
-		// Y logic, X remains constant.
-		for _, num := range NumbersBetween(l.start.y, l.end.y) {
-			p := Point{
-				x: l.start.x,
-				y: num,
-			}
-			points = append(points, p)
-		}
-
+		points = append(points, p)
 	}
 
 	return points
@@ -107,21 +91,36 @@ func NewVentMap(xMin, xMax, yMin, yMax int) *VentMap {
 	return vm
 }
 
-func NumbersBetween(s, e int) []int {
-
-	// Firstly put the numbers in order.
-	start := s
-	end := e
-
-	if s > e {
-		end = s
-		start = e
-	}
+func NumbersBetween(start, end int) []int {
 
 	nums := make([]int, 0)
 
-	for i := start; i <= end; i++ {
-		nums = append(nums, i)
+	// Work out direction.
+	ascending := true
+
+	if start > end {
+		ascending = false
+	}
+
+	if ascending {
+		for i := start; i <= end; i++ {
+			nums = append(nums, i)
+		}
+	} else {
+		for i := start; i >= end; i-- {
+			nums = append(nums, i)
+		}
+	}
+
+	return nums
+}
+
+func ArrayToLength(value, length int) []int {
+
+	nums := make([]int, 0)
+
+	for i := 0; i < length; i++ {
+		nums = append(nums, value)
 	}
 
 	return nums
