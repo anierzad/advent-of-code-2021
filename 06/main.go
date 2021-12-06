@@ -9,9 +9,12 @@ import (
 	"strings"
 )
 
+const (
+	spawnRate int = 7
+)
+
 type LanternFish struct {
-	spawnRate int
-	current int
+	current uint8
 }
 
 func (f *LanternFish) PassDay() (*LanternFish, bool) {
@@ -20,7 +23,7 @@ func (f *LanternFish) PassDay() (*LanternFish, bool) {
 	if f.current < 1 {
 
 		// Reset.
-		f.current = f.spawnRate - 1
+		f.current = uint8(spawnRate - 1)
 
 		// Create new fish.
 		fish := NewLanternFish()
@@ -35,7 +38,6 @@ func (f *LanternFish) PassDay() (*LanternFish, bool) {
 
 func NewLanternFish() *LanternFish {
 	return &LanternFish{
-		spawnRate: 7,
 		current: 8,
 	}
 }
@@ -70,13 +72,15 @@ func main() {
 		}
 
 		fish := NewLanternFish()
-		fish.current = iv
+		fish.current = uint8(iv)
 
 		school = append(school, fish)
 	}
 
 	// Simulate days.
-	for i := 0; i < 80; i++ {
+	for i := 0; i < 256; i++ {
+
+		start := time.Now()
 
 		newFish := make([]*LanternFish, 0)
 
@@ -89,6 +93,7 @@ func main() {
 		}
 
 		school = append(school, newFish...)
+
 	}
 
 	// Total fish.
