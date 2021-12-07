@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -20,7 +19,22 @@ func (sp *ShipPosition) Add(count int) {
 }
 
 func (sp ShipPosition) FuelNeeded(pos int) int {
-	reqFuel := int(math.Abs(float64(sp.horizontal - pos)))
+
+	start := sp.horizontal
+	end := pos
+
+	if start > end {
+		start = pos
+		end = sp.horizontal
+	}
+
+	reqFuel := 0
+	currentBurn := 1
+
+	for i := start; i < end; i++ {
+		reqFuel += currentBurn
+		currentBurn++
+	}
 
 	return reqFuel * sp.count
 }
@@ -51,6 +65,8 @@ func main() {
 	vals := strings.Split(line, ",")
 
 	// Create positions.
+	minPos := -1
+	maxPos := -1
 	positions := make(map[int]*ShipPosition)
 
 	for _, val := range vals {
@@ -74,29 +90,33 @@ func main() {
 
 		// Add one to count.
 		position.Add(1)
+
+		// Max/min.
+		if iv < minPos ||
+			minPos < 0 {
+			minPos = iv
+		}
+		if iv > maxPos ||
+			maxPos < 0 {
+			maxPos = iv
+		}
 	}
 
 	// Work out cheapest.
 	cheapest := -1
 
-	for _, oSp := range positions {
+	for i := minPos; i <= maxPos; i++ {
 
 		totalFuel := 0
 
 		for _, iSp := range positions {
 
-			// Skip if it's the same position.
-			if iSp == oSp {
-				continue
-			}
-
 			// Add to fuel cost.
-			totalFuel += iSp.FuelNeeded(oSp.horizontal)
+			totalFuel += iSp.FuelNeeded(i)
 		}
 
 		if totalFuel < cheapest ||
 			cheapest < 0 {
-
 			cheapest = totalFuel
 		}
 	}
