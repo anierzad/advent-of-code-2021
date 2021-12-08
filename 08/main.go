@@ -53,6 +53,60 @@ func (dd DisplayDigit) Value() int {
 	return value
 }
 
+func (dd DisplayDigit) Print() [][]rune {
+	lines := make([][]rune, 7)
+
+	for i := range lines {
+		line := make([]rune, 6)
+
+		for p := range line {
+			line[p] = ' '
+		}
+
+		switch i {
+		case 0:
+			if dd.segments['a'] {
+				line[1] = 'a'
+				line[2] = 'a'
+				line[3] = 'a'
+				line[4] = 'a'
+			}
+		case 1, 2:
+			if dd.segments['b'] {
+				line[0] = 'b'
+			}
+			if dd.segments['c'] {
+				line[5] = 'c'
+			}
+		case 3:
+			if dd.segments['d'] {
+				line[1] = 'd'
+				line[2] = 'd'
+				line[3] = 'd'
+				line[4] = 'd'
+			}
+		case 4, 5:
+			if dd.segments['e'] {
+				line[0] = 'e'
+			}
+			if dd.segments['f'] {
+				line[5] = 'f'
+			}
+		case 6:
+			if dd.segments['g'] {
+				line[1] = 'g'
+				line[2] = 'g'
+				line[3] = 'g'
+				line[4] = 'g'
+			}
+		}
+
+		lines[i] = line
+	}
+
+	return lines
+}
+
 func NewDisplayDigit(output string) *DisplayDigit {
 	dd := &DisplayDigit{
 		output: output,
@@ -69,6 +123,25 @@ func NewDisplayDigit(output string) *DisplayDigit {
 type Display struct {
 	digits []*DisplayDigit
 	signals []string
+}
+
+func (d Display) Print() {
+
+	lines := make([]string, 7)
+
+	for _, digit := range d.digits {
+		for ln, line := range digit.Print() {
+			if lines[ln] == "" {
+				lines[ln] = string(line)
+				continue
+			}
+			lines[ln] = fmt.Sprintf("%s %s", lines[ln], string(line))
+		}
+	}
+
+	for _, line := range lines {
+		fmt.Println(line)
+	}
 }
 
 func (d Display) Value() int {
