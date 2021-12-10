@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
+	"sort"
 )
 
 var (
@@ -15,15 +17,40 @@ var (
 		'<': '>',
 	}
 	scores = map[rune]int{
-		')': 3,
-		']': 57,
-		'}': 1197,
-		'>': 25137,
+		')': 1,
+		']': 2,
+		'}': 3,
+		'>': 4,
 	}
 )
 
 type ChunkLine struct {
 	chunks []*Chunk
+}
+
+func (cl ChunkLine) AutoComplete() []rune {
+
+	corrections := make([]rune, 0)
+
+	for _, chunk := range cl.chunks {
+		ccs := chunk.AutoComplete()
+
+		corrections = append(corrections, ccs...)
+	}
+
+	return corrections
+}
+
+func (cl ChunkLine) AutoCompleteScore() int {
+
+	total := 0
+
+	for _, correction := range cl.AutoComplete() {
+		total *= 5
+		total += scores[correction]
+	}
+
+	return total
 }
 
 func NewChunkLine(line string) (*ChunkLine, int, bool) {
@@ -53,6 +80,23 @@ type Chunk struct {
 	open rune
 	close rune
 	chunks []*Chunk
+}
+
+func (c Chunk) AutoComplete() []rune {
+
+	corrections := make([]rune, 0)
+
+	for _, chunk := range c.chunks {
+		ccs := chunk.AutoComplete()
+
+		corrections = append(corrections, ccs...)
+	}
+
+	if c.close == 0 {
+		corrections = append(corrections, syntax[c.open])
+	}
+
+	return corrections
 }
 
 func NewChunk(line string, position, depth int) (*Chunk, int, bool) {
@@ -139,26 +183,24 @@ func main() {
 
 	scanner := bufio.NewScanner(f)
 
-	invalidRunes := make([]rune, 0)
-
 	for scanner.Scan() {
 		text := scanner.Text()
 
-		cl, cPos, invalid := NewChunkLine(text)
-		if invalid {
-
-			// Store rune.
-			invalidRunes = append(invalidRunes, rune(text[cPos]))
+		cl, _, invalid := NewChunkLine(text)
+		if !invalid {
+			chunkLines = append(chunkLines, cl)
 		}
-
-		chunkLines = append(chunkLines, cl)
 	}
 
-	totalScore := 0
+	acScores := make([]int, 0)
 
-	for _, r := range invalidRunes {
-		totalScore += scores[r]
+	for _, cl := range chunkLines {
+		acScores = append(acScores, cl.AutoCompleteScore())
 	}
 
-	fmt.Println("Score:", totalScore)
+	sort.Ints(acScores)
+
+	middle := int(math.Round(float64(len(acScores) / 2)))
+
+	fmt.Println("Auto complete score:", acScores[middle])
 }
