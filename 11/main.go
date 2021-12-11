@@ -48,6 +48,21 @@ func (og OctopusGrid) Flashes() int {
 	return og.flashes
 }
 
+func (og OctopusGrid) AllFlash() bool {
+
+	allFlash := true
+
+	for _, gp := range og.gridPoints {
+		o := og.octopi[gp]
+		if !o.Flashed {
+			allFlash = false
+			break
+		}
+	}
+
+	return allFlash
+}
+
 func (og *OctopusGrid) flashCascade() {
 
 	recurse := false
@@ -197,9 +212,13 @@ func main() {
 		}
 	}
 
-	// 100 ticks.
-	for i := 0; i < 100; i++ {
+	for i := 1;; i++ {
 		grid.Tick()
+
+		if grid.AllFlash() {
+			fmt.Println("First all flash:", i)
+			break
+		}
 	}
 
 	fmt.Println("Flashes:", grid.Flashes())
