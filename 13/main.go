@@ -73,6 +73,23 @@ func (p *Paper) AddDot(point Point) {
 	p.dots[point] = true
 }
 
+func (p *Paper) Print() {
+	for y := 0; y <= p.ySize; y++ {
+		for x := 0; x <= p.xSize; x++ {
+			value := p.dots[NewPoint(x, y)]
+
+			char := '.'
+
+			if value {
+				char = '#'
+			}
+
+			fmt.Print(string(char))
+		}
+		fmt.Println()
+	}
+}
+
 func (p *Paper) DotCount() int {
 	count := 0
 
@@ -171,8 +188,9 @@ func main() {
 		if split[0] == "y"{
 			paper.FoldY(index)
 		}
-		break
 	}
 
 	fmt.Println("Dot count:", paper.DotCount())
+
+	paper.Print()
 }
