@@ -56,10 +56,6 @@ func (cs CaveSystem) AllPaths(initial, end string) []*Route {
 
 	routes := sc.AllPaths(NewRoute(), ec, 0)
 
-	for _, r := range routes {
-		r.Print()
-	}
-
 	return routes
 }
 
