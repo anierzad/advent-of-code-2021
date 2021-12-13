@@ -54,7 +54,24 @@ func (cs CaveSystem) AllPaths(initial, end string) []*Route {
 		log.Fatal("Cave not found.")
 	}
 
-	routes := sc.AllPaths(NewRoute(), ec, 0)
+	// Get all routes.
+	routes := sc.AllPaths(NewRoute(), sc, ec, false, false)
+
+	// Dedupe routes.
+	deDupe := make(map[string]*Route)
+	for _, r := range routes {
+		str := r.ToString()
+		_, exists := deDupe[str]
+		if !exists {
+			deDupe[str] = r
+		}
+	}
+
+	// Make back in to a slice.
+	routes = make([]*Route, 0)
+	for _, v := range deDupe {
+		routes = append(routes, v)
+	}
 
 	return routes
 }
@@ -74,12 +91,18 @@ func (c *Cave) AddPath(p *Cave) {
 	c.paths = append(c.paths, p)
 }
 
-func (c *Cave) AllPaths(route *Route, target *Cave, depth int) []*Route {
+func (c *Cave) AllPaths(route *Route, start, target *Cave, revisit, rUsed bool) []*Route {
+
+	// Hold routes.
+	allRoutes := make([]*Route, 0)
+
+	// If we're the start and we've been here before return early.
+	if c == start && !c.canVisit(route) {
+		return allRoutes
+	}
 
 	// Add myself to the route.
 	route = route.AddCave(c)
-
-	allRoutes := make([]*Route, 0)
 
 	// End of path?
 	if c == target {
@@ -93,8 +116,19 @@ func (c *Cave) AllPaths(route *Route, target *Cave, depth int) []*Route {
 	for _, p := range c.paths {
 
 		// See if we can visit that cave again.
-		if p.canVisit(route) {
-			retRoutes := p.AllPaths(route, target, depth + 1)
+		can := p.canVisit(route)
+		if can || revisit {
+
+			if !can {
+				rUsed = true
+			}
+
+			if !rUsed {
+				retRoutes := p.AllPaths(route, start, target, true, rUsed)
+				allRoutes = append(allRoutes, retRoutes...)
+			}
+
+			retRoutes := p.AllPaths(route, start, target, false, rUsed)
 			allRoutes = append(allRoutes, retRoutes...)
 		}
 	}
@@ -157,8 +191,7 @@ func (r Route) Contains(cave *Cave) bool {
 	return false
 }
 
-func (r *Route) Print() {
-
+func (r Route) ToString() string {
 	routeStr := ""
 
 	for _, l := range r.locations {
@@ -171,7 +204,11 @@ func (r *Route) Print() {
 		routeStr = fmt.Sprintf("%s -> %s", routeStr, l.name)
 	}
 
-	fmt.Printf("address: %v | %v\n", &r, routeStr)
+	return routeStr
+}
+
+func (r *Route) Print() {
+	fmt.Printf("address: %v | %v\n", &r, r.ToString())
 }
 
 func NewRoute() *Route {
