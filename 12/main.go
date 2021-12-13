@@ -80,16 +80,8 @@ func (c *Cave) AddPath(p *Cave) {
 
 func (c *Cave) AllPaths(route *Route, target *Cave, depth int) []*Route {
 
-
-	fmt.Println("me:", c.name, "depth:", depth, "stage:", "entry")
-	fmt.Println("Current route:")
-	route.Print()
-
 	// Add myself to the route.
 	route = route.AddCave(c)
-	fmt.Println("me:", c.name, "depth:", depth, "stage:", "post-append")
-	fmt.Println("Current route:")
-	route.Print()
 
 	allRoutes := make([]*Route, 0)
 
@@ -98,79 +90,18 @@ func (c *Cave) AllPaths(route *Route, target *Cave, depth int) []*Route {
 
 		allRoutes = append(allRoutes, route)
 
-		fmt.Println("me:", c.name, "depth:", depth, "stage:", "reached target")
-
-		fmt.Println("All routes:")
-		for _, r := range allRoutes {
-			r.Print()
-		}
-
-		fmt.Println()
-		fmt.Scanln()
-
 		return allRoutes
 	}
 
 	// Pass the route to all my paths and store returned routes.
 	for _, p := range c.paths {
 
-		if c.name == "b" {
-			fmt.Printf("b ALL ROUTES STATE address: %p\n", &allRoutes)
-			for _, r := range allRoutes {
-				r.Print()
-			}
-			fmt.Println()
-			fmt.Scanln()
-		}
-
 		// See if we can visit that cave again.
 		if p.canVisit(route) {
-
 			retRoutes := p.AllPaths(route, target, depth + 1)
-
-			fmt.Println("me:", c.name, "depth:", depth, "stage:", "got results from", p.name)
-
-			fmt.Println("Returned routes:")
-			for _, r := range retRoutes {
-				r.Print()
-			}
-			fmt.Println()
-			fmt.Scanln()
-
-			if len(retRoutes) > 0 {
-				fmt.Println("me:", c.name, "depth:", depth, "stage:", "before append!", p.name)
-				fmt.Println("All routes:")
-				for _, r := range allRoutes {
-					r.Print()
-				}
-				fmt.Println()
-				fmt.Scanln()
-			}
-
-			for _, rr := range retRoutes {
-				allRoutes = append(allRoutes, rr)
-			}
-
-			if len(retRoutes) > 0 {
-				fmt.Println("me:", c.name, "depth:", depth, "stage:", "after append!", p.name)
-				fmt.Println("All routes:")
-				for _, r := range allRoutes {
-					r.Print()
-				}
-				fmt.Println()
-				fmt.Scanln()
-			}
-
+			allRoutes = append(allRoutes, retRoutes...)
 		}
 	}
-
-	fmt.Println("me:", c.name, "depth:", depth, "stage:", "returning")
-	fmt.Println("All routes:")
-	for _, r := range allRoutes {
-		r.Print()
-	}
-	fmt.Println()
-	fmt.Scanln()
 
 	return allRoutes
 }
