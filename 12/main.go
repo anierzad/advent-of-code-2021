@@ -139,11 +139,17 @@ type Route struct {
 
 func (r Route) AddCave(cave *Cave) *Route {
 
-	loc := append(r.locations, cave)
-
-	return &Route{
-		locations: loc,
+	nr := &Route{
+		locations: make([]*Cave, 0),
 	}
+
+	for _, l := range r.locations {
+		nr.locations = append(nr.locations, l)
+	}
+
+	nr.locations = append(nr.locations, cave)
+
+	return nr
 }
 
 func (r Route) Contains(cave *Cave) bool {
